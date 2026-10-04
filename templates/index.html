@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Book an Appointment{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">ONLINE APPOINTMENT BOOKING</p>
+  <h1>Book the right appointment in minutes.</h1>
+  <p>Choose a provider, select a date and time, and confirm your appointment.</p>
+</section>
+
+<section class="grid">
+{% for provider in providers %}
+<article class="card">
+  <div class="icon">+</div>
+  <h2>{{ provider["name"] }}</h2>
+  <p class="service">{{ provider["service"] }}</p>
+  <p>{{ provider["description"] }}</p>
+
+  <form method="post" action="{{ url_for('book') }}">
+    <input type="hidden" name="provider_id" value="{{ provider['id'] }}">
+    <label>Your name</label>
+    <input name="customer_name" placeholder="Enter your name" required>
+    <label>Date</label>
+    <input type="date" name="appointment_date" required>
+    <label>Time</label>
+    <input type="time" name="appointment_time" required>
+    <button type="submit">Book appointment</button>
+  </form>
+</article>
+{% endfor %}
+</section>
+{% endblock %}
