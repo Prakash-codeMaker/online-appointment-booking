@@ -4,8 +4,14 @@
 <section class="hero">
   <p class="eyebrow">ONLINE APPOINTMENT BOOKING</p>
   <h1>Book the right appointment in minutes.</h1>
-  <p>Choose a provider, select a date and time, and confirm your appointment.</p>
+  <p>Search by provider or service, then choose a date and time.</p>
 </section>
+
+<form class="search" method="get" action="{{ url_for('index') }}">
+  <input name="q" value="{{ query }}" placeholder="Search provider or service">
+  <button type="submit">Search</button>
+  {% if query %}<a href="{{ url_for('index') }}">Clear</a>{% endif %}
+</form>
 
 <section class="grid">
 {% for provider in providers %}
@@ -26,6 +32,8 @@
     <button type="submit">Book appointment</button>
   </form>
 </article>
+{% else %}
+  <article class="card empty"><h2>No providers found</h2><p>Try a different provider name or service.</p></article>
 {% endfor %}
 </section>
 {% endblock %}
