@@ -35,7 +35,7 @@ def book():
         return redirect(url_for("index"))
 
     db = get_db()
-    provider = db.execute("SELECT id, name FROM providers WHERE id = ?", (provider_id,)).fetchone()
+    provider = db.execute("SELECT id FROM providers WHERE id = ?", (provider_id,)).fetchone()
     if provider is None:
         flash("Provider not found.")
         return redirect(url_for("index"))
@@ -84,6 +84,50 @@ def cancel(appointment_id):
     )
     db.commit()
     flash("Appointment cancelled.")
+    return redirect(url_for("appointments"))
+
+@app.post("/appointments/<int:appointment_id>/reschedule")
+def reschedule(appointment_id):
+    appointment_date = request.form.get("appointment_date", "").strip()
+    appointment_time = request.form.get("appointment_time", "").strip()
+
+    if not all([appointment_date, appointment_time]):
+        flash("Please select a new date and time.")
+        return redirect(url_for("appointments"))
+
+    db = get_db()
+    current = db.execute(
+        "SELECT provider_id, status FROM appointments WHERE id = ?",
+        (appointment_id,),
+    ).fetchone()
+
+    if current is None:
+        flash("Appointment not found.")
+        return redirect(url_for("appointments"))
+
+    if current["status"] != "Booked":
+        flash("Only booked appointments can be rescheduled.")
+        return redirect(url_for("appointments"))
+
+    conflict = db.execute(
+        """SELECT id FROM appointments
+           WHERE provider_id = ? AND appointment_date = ? AND appointment_time = ?
+           AND status = 'Booked' AND id != ?""",
+        (current["provider_id"], appointment_date, appointment_time, appointment_id),
+    ).fetchone()
+
+    if conflict:
+        flash("The new time slot is already booked.")
+        return redirect(url_for("appointments"))
+
+    db.execute(
+        """UPDATE appointments
+           SET appointment_date = ?, appointment_time = ?
+           WHERE id = ?""",
+        (appointment_date, appointment_time, appointment_id),
+    )
+    db.commit()
+    flash("Appointment rescheduled successfully.")
     return redirect(url_for("appointments"))
 
 if __name__ == "__main__":
