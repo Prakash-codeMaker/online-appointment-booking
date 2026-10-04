@@ -8,11 +8,20 @@ init_db()
 
 @app.get("/")
 def index():
+    query = request.args.get("q", "").strip()
     db = get_db()
-    providers = db.execute(
-        "SELECT id, name, service, description FROM providers ORDER BY name"
-    ).fetchall()
-    return render_template("index.html", providers=providers)
+    if query:
+        providers = db.execute(
+            """SELECT id, name, service, description FROM providers
+               WHERE name LIKE ? OR service LIKE ? OR description LIKE ?
+               ORDER BY name""",
+            (f"%{query}%", f"%{query}%", f"%{query}%"),
+        ).fetchall()
+    else:
+        providers = db.execute(
+            "SELECT id, name, service, description FROM providers ORDER BY name"
+        ).fetchall()
+    return render_template("index.html", providers=providers, query=query)
 
 @app.post("/book")
 def book():
