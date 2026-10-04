@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Appointments{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <p class="eyebrow">MY APPOINTMENTS</p>
+  <h1>Appointment dashboard</h1>
+  <p>Track booked and cancelled appointments from one place.</p>
+</section>
+<section class="table-wrap">
+<table>
+  <thead>
+    <tr><th>Customer</th><th>Provider</th><th>Service</th><th>Date</th><th>Time</th><th>Status</th><th>Action</th></tr>
+  </thead>
+  <tbody>
+  {% for item in appointments %}
+    <tr>
+      <td>{{ item["customer_name"] }}</td>
+      <td>{{ item["provider_name"] }}</td>
+      <td>{{ item["service"] }}</td>
+      <td>{{ item["appointment_date"] }}</td>
+      <td>{{ item["appointment_time"] }}</td>
+      <td><span class="status">{{ item["status"] }}</span></td>
+      <td>
+        {% if item["status"] == "Booked" %}
+        <form method="post" action="{{ url_for('cancel', appointment_id=item['id']) }}">
+          <button class="danger" type="submit">Cancel</button>
+        </form>
+        {% else %}—{% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="7">No appointments yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</section>
+{% endblock %}
